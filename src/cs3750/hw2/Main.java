@@ -2,52 +2,79 @@ package cs3750.hw2;
 import java.util.Scanner;
 
 public class Main {
-    private final int DELTAONE = 0x11111111;
-    private final int DELTATWO   = 0x11111111;
+    private static final int[] delta = {0x11111111, 0x22222222};
     private static int[] k = new int[4];
     private static int[] l = new int[3];
     private static int[] r = new int[3];
+    private static Scanner sysIn = new Scanner(System.in);     // Scanner object for reading user inputs
 
 
     public static void main(String[] args) {
         System.out.println("Main Start");
-        String test = "ABCD1234";
-        int testInt = Integer.parseUnsignedInt(test, 16);
-        System.out.printf("Original String: %s %n", test);
-        System.out.printf("Int: %d %n", testInt);
-        System.out.printf("0x%s%n", String.format("%08X", testInt));
         askForKeys();
+        askForPlaintext();
+        printKeys();
+        encrypt();
+        printText();
+        decrypt();
+        printText();
     }
 
     public static void askForKeys() {
-        Scanner sysIn = new Scanner(System.in);     // Create a Scanner object
-
         for (int i=0; i < 4; i++) {
             System.out.printf("Please input K[%d] in Hex String (without \"0x\"): ", i);
-            k[i] = hexStringToInt(sysIn.nextLine());  // Read user input
-        }
-
-        for (int i : k){
-            System.out.printf("Int: %d %n", i);
-            System.out.printf("String: %s %n", Integer.toString(i));
-            System.out.printf("0x%d%n", Integer.parseUnsignedInt(Integer.toString(i), 16));
+            k[i] = Integer.parseUnsignedInt(sysIn.nextLine(), 16);  // Read user input
         }
     }
 
-    public static int hexStringToInt(String hexString) {
-        int hexValue = 0;
-        char[] hexChars = hexString.toCharArray();
+    public static void askForPlaintext() {
+        System.out.print("Please input L[0] in Hex String (without \"0x\"): ");
+        l[0] = Integer.parseUnsignedInt(sysIn.nextLine(), 16);  // Read user input
 
-        if (hexChars.length != 8) {
-            throw new IllegalArgumentException("Hexadecimal string provided has the wrong number of characters");
-        }
+        System.out.print("Please input R[0] in Hex String (without \"0x\"): ");
+        r[0] = Integer.parseUnsignedInt(sysIn.nextLine(), 16);  // Read user input
 
-        for (int i = 0; i < 8; i++){
-            int charValue = Character.getNumericValue(hexChars[i]);
-            if (charValue > 15)
-                throw new IllegalArgumentException("Hexadecimal string provided has invalid characters");
-            hexValue += Math.pow(16, 7-i) * charValue;
+        l[1] = 0x00000000;
+        l[2] = 0x00000000;
+        r[1] = 0x00000000;
+        r[2] = 0x00000000;
+    }
+
+    public static void encrypt() {
+        int[] temp = new int[3];
+        for (int i = 0; i < 2; i++) {
+            System.out.printf("Beginning encryption round %d...%n", i + 1);
+            l[i + 1] = r[i];
+            temp[0] = (r[i] << 4) + k[i * 2];
+            temp[1] = (r[i] >>> 5) + k[i * 2 + 1];
+            temp[2] = r[i] + delta[i];
+            r[i + 1] = l[i] + (temp[0] ^ temp[1] ^ temp[2]);
         }
-        return hexValue;
+        System.out.println("Encryption finished");
+    }
+
+    public static void decrypt() {
+        int[] temp = new int[3];
+        for (int i = 0; i < 2; i++) {
+            System.out.printf("Beginning decryption round %d...%n", i + 1);
+            r[1 - i] = l[2 - i];
+            temp[0] = (l[2 - i] << 4) + k[2 - (2 * i)];
+            temp[1] = (l[2 - i] >>> 5) + k[3 - (2 * i)];
+            temp[2] = l[2 - i] + delta[1 - i];
+            l[1 - i] = r[2 - i] - (temp[0] ^ temp[1] ^ temp[2]);
+        }
+        System.out.println("Decryption finished");
+    }
+
+    public static void printText() {
+        for (int i = 0; i < 3; i++){
+            System.out.printf("L[%d] = 0x%s     R[%d] = 0x%s%n", i, String.format("%08X", l[i]), i, String.format("%08X", r[i]));
+        }
+    }
+
+    public static void printKeys() {
+        for (int i = 0; i < 4; i++){
+            System.out.printf("K[%d] = 0x%s%n", i, String.format("%08X", k[i]));
+        }
     }
 }
