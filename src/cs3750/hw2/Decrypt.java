@@ -10,9 +10,9 @@ public class Decrypt {
 
 
     public static void main(String[] args) {
-        System.out.println("Main Start");
         askForKeys();
         askForPlaintext();
+        printKeys();
         decrypt();
         printText();
     }
