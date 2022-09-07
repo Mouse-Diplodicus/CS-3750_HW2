@@ -57,6 +57,7 @@ public class Encrypt {
     }
 
     public static void printKeys() {
+        System.out.println();
         for (int i = 0; i < 4; i++){
             System.out.printf("K[%d] = 0x%s%n", i, String.format("%08X", k[i]));
         }

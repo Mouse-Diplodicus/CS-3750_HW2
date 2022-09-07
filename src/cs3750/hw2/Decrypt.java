@@ -51,12 +51,13 @@ public class Decrypt {
     }
 
     public static void printText() {
-        for (int i = 0; i < 3; i++){
+        for (int i = 2; i >= 0; i--){
             System.out.printf("L[%d] = 0x%s     R[%d] = 0x%s%n", i, String.format("%08X", l[i]), i, String.format("%08X", r[i]));
         }
     }
 
     public static void printKeys() {
+        System.out.println();
         for (int i = 0; i < 4; i++){
             System.out.printf("K[%d] = 0x%s%n", i, String.format("%08X", k[i]));
         }
